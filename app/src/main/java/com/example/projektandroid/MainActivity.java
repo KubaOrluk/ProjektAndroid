@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.activity_main);
 
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            findViewById(R.id.graj).setOnClickListener(new View.OnClickListener() {
+            findViewById(R.id.Play).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     startActivity(new Intent(MainActivity.this, GameActivity.class));
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
             TextView highScoreTxt = findViewById(R.id.highScoreTxt);
 
             SharedPreferences prefs = getSharedPreferences("game", MODE_PRIVATE);
-            highScoreTxt.setText("HighScore: " + prefs.getInt("highscore", 0));
+            highScoreTxt.setText(getString(R.string.highscore) + prefs.getInt("highscore", 0));
 
             isMute = prefs.getBoolean("isMute", false);
 

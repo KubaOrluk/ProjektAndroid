@@ -9,8 +9,9 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/background"/>
-        android:scaleType="centerCrop"/>
+        android:background="#009395"
+        android:src="@drawable/background" />
+        android:scaleType=""/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -18,25 +19,25 @@
         android:textSize="48sp"
         android:text="@string/projekt_android"
         android:textColor="#ffffff"
-        android:layout_above="@id/graj"
+        android:layout_above="@id/Play"
         android:layout_below="@id/highScoreTxt"
         android:layout_centerHorizontal="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/graj"
+        android:text="@string/play"
         android:textSize="64sp"
         android:layout_centerInParent="true"
         android:textColor="#000000"
-        android:id="@+id/graj"/>
+        android:id="@+id/Play"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:textColor="#000000"
-        android:text="@string/rekord_punktow"
+        android:text="@string/highscore"
         android:id="@+id/highScoreTxt"
         android:layout_margin="16dp"
         android:layout_alignParentRight="true"/>

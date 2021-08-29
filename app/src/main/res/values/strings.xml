@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">ProjektAndroid</string>
-    <string name="projekt_android">Projekt Android</string>
-    <string name="graj">Graj</string>
-    <string name="rekord_punktow">Rekord punktow</string>
+    <string name="projekt_android">Windows Defender</string>
+    <string name="play">Play</string>
+    <string name="highscore">High Score:</string>
 </resources>

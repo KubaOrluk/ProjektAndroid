@@ -11,7 +11,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
-import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 
@@ -26,13 +25,13 @@ public class GameView extends SurfaceView implements Runnable {
     private int screenX, screenY, score = 0;
     public static float screenRatioX, screenRatioY; //aby inne klasy mialy dostep
     private Paint paint;
-    private Bird[] birds;
+    private Virus[] viruses;
     private SharedPreferences prefs;
     private Random random;
-    private SoundPool soundPool;
-    private List<Bullet> bullets;
-    private int sound;
-    private Flight flight;
+    private SoundPool dingPool, chimesPool, chordPool;
+    private List<Antivirus> Antiviruses;
+    private int ding, chimes, chord;
+    private WinFlag winFlag;
     private GameActivity activity;
     private Background background1, background2;
 
@@ -50,13 +49,22 @@ public class GameView extends SurfaceView implements Runnable {
                     .setUsage(AudioAttributes.USAGE_GAME)
                     .build();
 
-            soundPool = new SoundPool.Builder()
+            dingPool = new SoundPool.Builder()
+                    .setAudioAttributes(audioAttributes)
+                    .build();
+            chimesPool = new SoundPool.Builder()
+                    .setAudioAttributes(audioAttributes)
+                    .build();
+            chordPool = new SoundPool.Builder()
                     .setAudioAttributes(audioAttributes)
                     .build();
         } else
-            soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+            dingPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+            chimesPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 
-        sound = soundPool.load(activity, R.raw.shoot, 1);
+        ding = dingPool.load(activity, R.raw.ding, 1);
+        chimes = chimesPool.load(activity, R.raw.chimes, 1);
+        chord = chordPool.load(activity, R.raw.chord, 1);
 
         this.screenX = screenX; //ustawiamy wartosc naszych prywatnych obiektow
         this.screenY = screenY;
@@ -67,9 +75,9 @@ public class GameView extends SurfaceView implements Runnable {
         background1 = new Background(screenX, screenY, getResources()); //obiekty klasy background
         background2 = new Background(screenX, screenY, getResources());
 
-        flight = new Flight(this, screenY, getResources());
+        winFlag = new WinFlag(this, screenY, getResources());
 
-        bullets = new ArrayList<>();
+        Antiviruses = new ArrayList<>();
 
         background2.x = screenX; //modyfikujemy szerokosc tla ustawiajac wartosc szerokosci ekranu
 
@@ -77,11 +85,11 @@ public class GameView extends SurfaceView implements Runnable {
         paint.setTextSize(128);
         paint.setColor(Color.WHITE);
 
-        birds = new Bird[4];
+        viruses = new Virus[4];
 
         for (int i = 0; i < 4; i++){
-            Bird bird = new Bird(getResources());
-            birds[i] = bird;
+            Virus virus = new Virus(getResources());
+            viruses[i] = virus;
         }
 
         random = new Random();
@@ -108,65 +116,71 @@ public class GameView extends SurfaceView implements Runnable {
             background2.x = screenX;
         }
 
-        if(flight.isGoingUp)
-            flight.y -= 30 * screenRatioY;
+        if(winFlag.isGoingUp)
+            winFlag.y -= 30 * screenRatioY;
         else
-            flight.y += 30 * screenRatioY;
+            winFlag.y += 30 * screenRatioY;
 
-        if (flight.y < 0) //dzieki temu nie wyjdziemy poza ekran
-            flight.y = 0;
+        if (winFlag.y < 0) //dzieki temu nie wyjdziemy poza ekran
+            winFlag.y = 0;
 
-        if (flight.y > screenY - flight.height) //dzieki temu nie wyjdziemy poza ekran
-            flight.y = screenY - flight.height;
+        if (winFlag.y > screenY - winFlag.height) //dzieki temu nie wyjdziemy poza ekran
+            winFlag.y = screenY - winFlag.height;
 
-        List<Bullet> trash = new ArrayList<>();
-        for (Bullet bullet: bullets) {
-            if(bullet.x > screenX)
-                trash.add(bullet);
+        List<Antivirus> trash = new ArrayList<>();
+        for (Antivirus antivirus : Antiviruses) {
+            if(antivirus.x > screenX)
+                trash.add(antivirus);
 
-            bullet.x += 50 * screenRatioX;
+            antivirus.x += 50 * screenRatioX;
 
-            for (Bird bird : birds){
+            for (Virus virus : viruses){
 
-                if(Rect.intersects(bird.getCollisionShape(), bullet.getCollisionShape() )){
+                if(Rect.intersects(virus.getCollisionShape(), antivirus.getCollisionShape() )){
 
                     score++;
-                    bird.x = -500;
-                    bullet.x = screenX + 500;
-                    bird.wasShot = true;
+                    virus.x = -500;
+                    antivirus.x = screenX + 500;
+                    virus.wasShot = true;
+                    if (!prefs.getBoolean("isMute", false))
+                        chimesPool.play(chimes, 1, 1, 0, 0, 1);
                 }
             }
         }
 
-        for(Bullet bullet: trash)
-            bullets.remove(bullet);
+        for(Antivirus antivirus : trash)
+            Antiviruses.remove(antivirus);
 
-        for (Bird bird : birds) {
+        for (Virus virus : viruses) {
 
-            bird.x -= bird.speed;
+            virus.x -= virus.speed;
 
-            if(bird.x + bird.width < 0){
+            if(virus.x + virus.width < 0){
 
-                if (!bird.wasShot) {
+                if (!virus.wasShot) {
                     isGameOver = true;
+                    if (!prefs.getBoolean("isMute", false))
+                        chordPool.play(chord, 1, 1, 0, 0, 1);
                     return;
                 }
 
                 int bound = (int) (30 * screenRatioX);
-                bird.speed = random.nextInt(bound); //nadanie randomowej predkosci
+                virus.speed = random.nextInt(bound); //nadanie randomowej predkosci
 
-                if (bird.speed < 10 * screenRatioX)
-                    bird.speed = (int) (10 * screenRatioX);
+                if (virus.speed < 10 * screenRatioX)
+                    virus.speed = (int) (10 * screenRatioX);
 
-                bird.x = screenX;
-                bird.y = random.nextInt(screenY - bird.height);
+                virus.x = screenX;
+                virus.y = random.nextInt(screenY - virus.height);
 
-                bird.wasShot = false;
+                virus.wasShot = false;
             }
 
-            if (Rect.intersects(bird.getCollisionShape(), flight.getCollisionShape())) {
+            if (Rect.intersects(virus.getCollisionShape(), winFlag.getCollisionShape())) {
 
                 isGameOver = true;
+                if (!prefs.getBoolean("isMute", false))
+                    chordPool.play(chord, 1, 1, 0, 0, 1);
                 return;
             }
         }
@@ -178,14 +192,14 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawBitmap(background1.background, background1.x, background1.y, paint);
             canvas.drawBitmap(background2.background, background2.x, background2.y, paint);
 
-            for (Bird bird : birds)
-                canvas.drawBitmap(bird.getBird(), bird.x, bird.y, paint);
+            for (Virus virus : viruses)
+                canvas.drawBitmap(virus.getBird(), virus.x, virus.y, paint);
 
             canvas.drawText(score + "", screenX / 2f, 164, paint);
 
             if (isGameOver) {
                 isPlaying = false;
-                canvas.drawBitmap(flight.getDead(), flight.x, flight.y, paint);
+                canvas.drawBitmap(winFlag.getDead(), winFlag.x, winFlag.y, paint);
                 getHolder().unlockCanvasAndPost(canvas);
                 saveIfHighScore();
                 waitBeforeExiting();
@@ -194,10 +208,10 @@ public class GameView extends SurfaceView implements Runnable {
 
 
 
-            canvas.drawBitmap(flight.getFlight(), flight.x, flight.y, paint);
+            canvas.drawBitmap(winFlag.getFlight(), winFlag.x, winFlag.y, paint);
 
-            for (Bullet bullet: bullets)
-                canvas.drawBitmap(bullet.bullet, bullet.x, bullet.y, paint);
+            for (Antivirus antivirus : Antiviruses)
+                canvas.drawBitmap(antivirus.Antivirus, antivirus.x, antivirus.y, paint);
             getHolder().unlockCanvasAndPost(canvas); //dzieki temu mozemy rysowac nasze obiekty na ekranie
         }
     }
@@ -251,13 +265,13 @@ public class GameView extends SurfaceView implements Runnable {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (event.getX() < screenX / 2) { //klikamy lewa strone ekranu
-                    flight.isGoingUp = true;
+                    winFlag.isGoingUp = true;
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                flight.isGoingUp = false;
+                winFlag.isGoingUp = false;
                 if (event.getX() > screenX / 2) //klikamy prawa strone ekranu
-                    flight.toShoot++;
+                    winFlag.toShoot++;
                 break;
         }
         return true; //uruchamiamy gdy uzytkownik dotknie ekranu
@@ -266,11 +280,11 @@ public class GameView extends SurfaceView implements Runnable {
     public void newBullet() {
 
         if (!prefs.getBoolean("isMute", false))
-            soundPool.play(sound, 1, 1, 0, 0, 1);
+            dingPool.play(ding, 1, 1, 0, 0, 1);
 
-        Bullet bullet = new Bullet(getResources());
-        bullet.x = flight.x + flight.width;
-        bullet.y = flight.y + (flight.height/2);
-        bullets.add(bullet);
+        Antivirus antivirus = new Antivirus(getResources());
+        antivirus.x = winFlag.x + winFlag.width;
+        antivirus.y = winFlag.y + (winFlag.height/2);
+        Antiviruses.add(antivirus);
     }
 }

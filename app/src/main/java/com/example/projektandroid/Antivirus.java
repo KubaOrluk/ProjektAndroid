@@ -8,25 +8,25 @@ import android.graphics.Rect;
 import static com.example.projektandroid.GameView.screenRatioX;
 import static com.example.projektandroid.GameView.screenRatioY;
 
-public class Bullet {
+public class Antivirus {
 
     int x, y, width, height;
 
-    Bitmap bullet;
+    Bitmap Antivirus;
 
-    Bullet(Resources res) {
-        bullet = BitmapFactory.decodeResource(res, R.drawable.bullet);
+    Antivirus(Resources res) {
+        Antivirus = BitmapFactory.decodeResource(res, R.drawable.antivirus);
 
-         width = bullet.getWidth();
-         height = bullet.getHeight();
+        width = Antivirus.getWidth();
+        height = Antivirus.getHeight();
 
-        width /= 4;
-        height /= 4;
+        width /= 2;
+        height /= 2;
 
         width = (int) (width * screenRatioX); //rzutowanie, screenRatioX jest floatem
         height = (int) (height * screenRatioY);
 
-        bullet = Bitmap.createScaledBitmap(bullet, width, height, false);
+        Antivirus = Bitmap.createScaledBitmap(Antivirus, width, height, false);
     }
 
     Rect getCollisionShape () {
