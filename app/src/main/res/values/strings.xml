@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ProjektAndroid</string>
+    <string name="app_name">Windows Defender</string>
     <string name="title">Windows Defender</string>
     <string name="highscore">Highest Score:</string>
     <string name="gameover">Game Over!</string>
