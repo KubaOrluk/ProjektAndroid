@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">ProjektAndroid</string>
-    <string name="projekt_android">Windows Defender</string>
-    <string name="play">Play</string>
-    <string name="highscore">High Score:</string>
+    <string name="title">Windows Defender</string>
+    <string name="highscore">Highest Score:</string>
+    <string name="gameover">Game Over!</string>
+    <string name="distanceTxt">Longest distance:</string>
 </resources>

@@ -18,28 +18,27 @@ public class MainActivity extends AppCompatActivity {
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
-
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            findViewById(R.id.Play).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    startActivity(new Intent(MainActivity.this, GameActivity.class));
-                }
-            });
+            findViewById(R.id.Start).setOnClickListener(view -> startActivity(new Intent(MainActivity.this, GameActivity.class)));
 
             TextView highScoreTxt = findViewById(R.id.highScoreTxt);
+            TextView distanceTxt = findViewById(R.id.distanceTxt);
 
             SharedPreferences prefs = getSharedPreferences("game", MODE_PRIVATE);
-            highScoreTxt.setText(getString(R.string.highscore) + prefs.getInt("highscore", 0));
+            highScoreTxt.setText(getString(R.string.highscore) + " " + prefs.getInt("highscore", 0));
+            distanceTxt.setText(getString(R.string.distanceTxt) + " " + prefs.getInt("distance", 0) + "m");
 
             isMute = prefs.getBoolean("isMute", false);
 
             ImageView volumeCtrl = findViewById(R.id.volumeControl);
 
-            if(isMute)
-                volumeCtrl.setImageResource(R.drawable.ic_baseline_volume_off_24);
-            else
-                volumeCtrl.setImageResource(R.drawable.ic_baseline_volume_up_24);
+            if(isMute){
+                volumeCtrl.setImageResource(R.drawable.sound_off);
+            }
+            else{
+                volumeCtrl.setImageResource(R.drawable.sound_on);
+            }
+
 
             volumeCtrl.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -47,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
                     isMute = !isMute;
                     if(isMute) {
-                        volumeCtrl.setImageResource(R.drawable.ic_baseline_volume_off_24);
+                        volumeCtrl.setImageResource(R.drawable.sound_off);
                     } else {
-                        volumeCtrl.setImageResource(R.drawable.ic_baseline_volume_up_24);
+                        volumeCtrl.setImageResource(R.drawable.sound_on);
                     }
 
                     SharedPreferences.Editor editor = prefs.edit();

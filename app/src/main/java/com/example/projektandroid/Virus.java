@@ -40,7 +40,7 @@ public class Virus {
 
     }
 
-    Bitmap getBird () {
+    Bitmap getVirus() {
         if (virusCounter == 1){
             virusCounter++;
             return virus1;

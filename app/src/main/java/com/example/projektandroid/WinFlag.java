@@ -12,7 +12,7 @@ public class WinFlag {
 
     public boolean isGoingUp = false;
     int x, y, width, height, toShoot = 0, hourglassCounter = 1, winCounter = 0;
-    Bitmap win1, win2, win3, win4, error;
+    Bitmap win1, win2, win3, win4, winerr1, winerr2, winerr3, winerr4;
     Bitmap hourglass1, hourglass2, hourglass3, hourglass4, hourglass5;
     private GameView gameView;
 
@@ -51,14 +51,20 @@ public class WinFlag {
         hourglass4 = Bitmap.createScaledBitmap(hourglass4, width, height, false);
         hourglass5 = Bitmap.createScaledBitmap(hourglass5, width, height, false);
 
-        error = BitmapFactory.decodeResource(res, R.drawable.error);
-        error = Bitmap.createScaledBitmap(error, width, height, false);
+        winerr1 = BitmapFactory.decodeResource(res, R.drawable.winerr1);
+        winerr1 = Bitmap.createScaledBitmap(winerr1, width, height, false);
+        winerr2 = BitmapFactory.decodeResource(res, R.drawable.winerr2);
+        winerr2 = Bitmap.createScaledBitmap(winerr2, width, height, false);
+        winerr3 = BitmapFactory.decodeResource(res, R.drawable.winerr3);
+        winerr3 = Bitmap.createScaledBitmap(winerr3, width, height, false);
+        winerr4 = BitmapFactory.decodeResource(res, R.drawable.winerr4);
+        winerr4 = Bitmap.createScaledBitmap(winerr4, width, height, false);
 
         y = screenY / 2;
         x = (int) (64 * screenRatioX);
     }
 
-    Bitmap getFlight () { //funkcja zwraca bitmape
+    Bitmap getWinSprite() { //funkcja zwraca bitmape
 
         if(toShoot != 0) {
             if (hourglassCounter == 1){
@@ -113,6 +119,12 @@ public class WinFlag {
     }
 
     Bitmap getDead () {
-        return error;
+        if (winCounter == 0) return winerr1;
+
+        if (winCounter == 1) return winerr2;
+
+        if (winCounter == 2) return winerr3;
+
+        return winerr4;
     }
 }

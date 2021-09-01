@@ -7,12 +7,15 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
+
+import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +25,7 @@ public class GameView extends SurfaceView implements Runnable {
 
     private Thread thread;
     private boolean isPlaying, isGameOver = false;
-    private int screenX, screenY, score = 0;
+    private int screenX, screenY, bgSpeed = 10, score = 0, meters = 0, framesCounter = 0;
     public static float screenRatioX, screenRatioY; //aby inne klasy mialy dostep
     private Paint paint;
     private Virus[] viruses;
@@ -34,6 +37,7 @@ public class GameView extends SurfaceView implements Runnable {
     private WinFlag winFlag;
     private GameActivity activity;
     private Background background1, background2;
+    Typeface winfont = ResourcesCompat.getFont(getContext(), R.font.winfont);
 
     public GameView(GameActivity activity, int screenX, int screenY) {
         super(activity);
@@ -42,25 +46,9 @@ public class GameView extends SurfaceView implements Runnable {
 
         prefs = activity.getSharedPreferences("game", Context.MODE_PRIVATE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .setUsage(AudioAttributes.USAGE_GAME)
-                    .build();
-
-            dingPool = new SoundPool.Builder()
-                    .setAudioAttributes(audioAttributes)
-                    .build();
-            chimesPool = new SoundPool.Builder()
-                    .setAudioAttributes(audioAttributes)
-                    .build();
-            chordPool = new SoundPool.Builder()
-                    .setAudioAttributes(audioAttributes)
-                    .build();
-        } else
-            dingPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-            chimesPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        dingPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        chimesPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        chordPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 
         ding = dingPool.load(activity, R.raw.ding, 1);
         chimes = chimesPool.load(activity, R.raw.chimes, 1);
@@ -84,6 +72,8 @@ public class GameView extends SurfaceView implements Runnable {
         paint = new Paint();
         paint.setTextSize(128);
         paint.setColor(Color.WHITE);
+        paint.setTypeface(winfont);
+        paint.setTextAlign(Paint.Align.CENTER);
 
         viruses = new Virus[4];
 
@@ -105,8 +95,8 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void update () { //zmieniamy pozycje naszego tla
-        background1.x -= 10*screenRatioX; //przesuniecie o 10 pikseli, uwzgledniajac rozdzielczosc
-        background2.x -= 10*screenRatioX;
+        background1.x -= bgSpeed; //przesuniecie o 10 pikseli
+        background2.x -= bgSpeed;
 
         if(background1.x + background1.background.getWidth() < 0) { //gdy nasze tlo calkowicie wychodzi poza ekran
             background1.x = screenX;
@@ -184,6 +174,12 @@ public class GameView extends SurfaceView implements Runnable {
                 return;
             }
         }
+
+        if(framesCounter == 20){
+            meters++;
+            framesCounter = 0;
+        }
+        else framesCounter++;
     }
 
     private void draw () {
@@ -193,22 +189,22 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawBitmap(background2.background, background2.x, background2.y, paint);
 
             for (Virus virus : viruses)
-                canvas.drawBitmap(virus.getBird(), virus.x, virus.y, paint);
+                canvas.drawBitmap(virus.getVirus(), virus.x, virus.y, paint);
 
             canvas.drawText(score + "", screenX / 2f, 164, paint);
+            canvas.drawText(meters + "m", screenX / 2f, screenY - 64, paint);
 
             if (isGameOver) {
                 isPlaying = false;
                 canvas.drawBitmap(winFlag.getDead(), winFlag.x, winFlag.y, paint);
+                canvas.drawText(getContext().getString(R.string.gameover), screenX / 2f, screenY / 2f, paint);
                 getHolder().unlockCanvasAndPost(canvas);
                 saveIfHighScore();
                 waitBeforeExiting();
                 return;
             }
 
-
-
-            canvas.drawBitmap(winFlag.getFlight(), winFlag.x, winFlag.y, paint);
+            canvas.drawBitmap(winFlag.getWinSprite(), winFlag.x, winFlag.y, paint);
 
             for (Antivirus antivirus : Antiviruses)
                 canvas.drawBitmap(antivirus.Antivirus, antivirus.x, antivirus.y, paint);
@@ -219,19 +215,24 @@ public class GameView extends SurfaceView implements Runnable {
     private void waitBeforeExiting() {
 
         try {
-            Thread.sleep(3000);
+            Thread.sleep(3500);
             activity.startActivity(new Intent(activity, MainActivity.class));
-            activity. finish();
+            activity.finish();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private void saveIfHighScore() { //funkcja zapisująca najwyższy wynik gracza
+    private void saveIfHighScore() { //funkcja zapisująca najwyższy wynik gracza i odleglosc
 
         if (prefs.getInt("highscore", 0) < score){
             SharedPreferences.Editor editor = prefs.edit();
             editor.putInt("highscore", score);
+            editor.apply();
+        }
+        if (prefs.getInt("distance", 0) < meters){
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("distance", meters);
             editor.apply();
         }
     }
@@ -284,7 +285,7 @@ public class GameView extends SurfaceView implements Runnable {
 
         Antivirus antivirus = new Antivirus(getResources());
         antivirus.x = winFlag.x + winFlag.width;
-        antivirus.y = winFlag.y + (winFlag.height/2);
+        antivirus.y = winFlag.y + (winFlag.height/4);
         Antiviruses.add(antivirus);
     }
 }
