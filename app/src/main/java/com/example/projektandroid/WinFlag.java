@@ -52,12 +52,13 @@ public class WinFlag {
         hourglass5 = Bitmap.createScaledBitmap(hourglass5, width, height, false);
 
         winerr1 = BitmapFactory.decodeResource(res, R.drawable.winerr1);
-        winerr1 = Bitmap.createScaledBitmap(winerr1, width, height, false);
         winerr2 = BitmapFactory.decodeResource(res, R.drawable.winerr2);
-        winerr2 = Bitmap.createScaledBitmap(winerr2, width, height, false);
         winerr3 = BitmapFactory.decodeResource(res, R.drawable.winerr3);
-        winerr3 = Bitmap.createScaledBitmap(winerr3, width, height, false);
         winerr4 = BitmapFactory.decodeResource(res, R.drawable.winerr4);
+
+        winerr1 = Bitmap.createScaledBitmap(winerr1, width, height, false);
+        winerr2 = Bitmap.createScaledBitmap(winerr2, width, height, false);
+        winerr3 = Bitmap.createScaledBitmap(winerr3, width, height, false);
         winerr4 = Bitmap.createScaledBitmap(winerr4, width, height, false);
 
         y = screenY / 2;
